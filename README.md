@@ -38,7 +38,8 @@ grpcurl 调试工具：
 >
 > go install github.com/fullstorydev/grpcurl/cmd/grpcurl
 
-
+cmux 多路复用：
+> go get -u github.com/soheilhy/cmux@v0.1.4
 
 
 
