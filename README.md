@@ -41,11 +41,16 @@ grpcurl 调试工具：
 cmux 多路复用：
 > go get -u github.com/soheilhy/cmux@v0.1.4
 
+protoc-gen-grpc-gateway 插件安装：
+> go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v1.14.5
 
-
-
-
-
-
-
+重新编译 proto 文件：
+```
+protoc -I/usr/local/include -I. \
+       -I$GOPATH/src \
+       -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+       --grpc-gateway_out=logtostderr=true:. \
+       ./proto/*.proto
+```
+protoc --grpc-gateway_out=logtostderr=true:. ./proto/*.proto
 
