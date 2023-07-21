@@ -5,6 +5,7 @@ import (
 	pb "github.com/iBaiYang/go-blog-tag-service-eddycjy/proto"
 	"github.com/iBaiYang/go-blog-tag-service-eddycjy/server"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
 )
@@ -19,6 +20,7 @@ func init() {
 func main() {
 	s := grpc.NewServer()
 	pb.RegisterTagServiceServer(s, server.NewTagServer())
+	reflection.Register(s)
 
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {

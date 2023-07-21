@@ -33,3 +33,18 @@ gRPC 库安装：
 编译和生成 proto 文件：
 > protoc --go_out=plugins=grpc:. ./proto/*.proto 
 
+grpcurl 调试工具：
+> go get github.com/fullstorydev/grpcurl
+>
+> go install github.com/fullstorydev/grpcurl/cmd/grpcurl
+
+
+
+
+
+
+
+
+
+
+
