@@ -7,7 +7,6 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	pb "github.com/iBaiYang/go-blog-tag-service-eddycjy/proto"
 	"github.com/iBaiYang/go-blog-tag-service-eddycjy/server"
-	"github.com/soheilhy/cmux"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
@@ -15,15 +14,17 @@ import (
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 	"log"
-	"net"
 	"net/http"
 	"strings"
 )
 
+/*
+初步运行一个gRPC服务
+*/
 //var port string
 //
 //func init() {
-//	flag.StringVar(&port, "p", "8000", "启动端口号")
+//	flag.StringVar(&port, "p", "8001", "启动端口号")
 //	flag.Parse()
 //}
 //
@@ -43,34 +44,16 @@ import (
 //	}
 //}
 
+/*
+在不同端口号同时监听
+*/
 //var grpcPort string
 //var httpPort string
 //
 //func init() {
 //	flag.StringVar(&grpcPort, "grpc_port", "8001", "gRPC 启动端口号")
-//	flag.StringVar(&httpPort, "http_port", "9001", "HTTP 启动端口号")
+//	flag.StringVar(&httpPort, "http_port", "8002", "HTTP 启动端口号")
 //	flag.Parse()
-//}
-//
-//func main() {
-//	errs := make(chan error)
-//	go func() {
-//		err := RunHttpServer(httpPort)
-//		if err != nil {
-//			errs <- err
-//		}
-//	}()
-//	go func() {
-//		err := RunGrpcServer(grpcPort)
-//		if err != nil {
-//			errs <- err
-//		}
-//	}()
-//
-//	select {
-//	case err := <-errs:
-//		log.Fatalf("Run Server err: %v", err)
-//	}
 //}
 //
 //func RunHttpServer(port string) error {
@@ -93,7 +76,31 @@ import (
 //
 //	return s.Serve(lis)
 //}
+//
+//func main() {
+//	errs := make(chan error)
+//	go func() {
+//		err := RunHttpServer(httpPort)
+//		if err != nil {
+//			errs <- err
+//		}
+//	}()
+//	go func() {
+//		err := RunGrpcServer(grpcPort)
+//		if err != nil {
+//			errs <- err
+//		}
+//	}()
+//
+//	select {
+//	case err := <-errs:
+//		log.Fatalf("Run Server err: %v", err)
+//	}
+//}
 
+/*
+在同一端口号同时监听
+*/
 //var port string
 //
 //func init() {
@@ -146,6 +153,9 @@ import (
 //	}
 //}
 
+/*
+同端口同方法提供双流量支持
+*/
 var port string
 
 func init() {
@@ -166,10 +176,6 @@ func grpcHandlerFunc(grpcServer *grpc.Server, otherHandler http.Handler) http.Ha
 func RunServer(port string) error {
 	httpMux := runHttpServer()
 	grpcS := runGrpcServer()
-
-	//endpoint := "0.0.0.0:" + port
-	//runtime.HTTPError = grpcGatewayError
-	//gwmux := runtime.NewServeMux()
 
 	gatewayMux := runGrpcGatewayServer()
 
@@ -197,6 +203,9 @@ func runGrpcServer() *grpc.Server {
 
 func runGrpcGatewayServer() *runtime.ServeMux {
 	endpoint := "0.0.0.0:" + port
+
+	runtime.HTTPError = grpcGatewayError
+
 	gwmux := runtime.NewServeMux()
 	dopts := []grpc.DialOption{grpc.WithInsecure()}
 	_ = pb.RegisterTagServiceHandlerFromEndpoint(context.Background(), gwmux, endpoint, dopts)
@@ -211,6 +220,9 @@ func main() {
 	}
 }
 
+/*
+对 grpc-gateway 的错误进行定制
+*/
 type httpError struct {
 	Code    int32  `json:"code,omitempty"`
 	Message string `json:"message,omitempty"`

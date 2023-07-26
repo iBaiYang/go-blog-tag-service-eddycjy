@@ -27,6 +27,8 @@ protoc 插件安装：
 
 ## 命令
 
+### 包安装命令
+
 gRPC 库安装：
 > go get -u google.golang.org/grpc@v1.29.1
 
@@ -38,11 +40,47 @@ grpcurl 调试工具：
 >
 > go install github.com/fullstorydev/grpcurl/cmd/grpcurl
 
+在win10上安装grpcurl会出问题，可以直接到目录 `G:\GoPath\pkg\mod\github.com\fullstorydev\grpcurl@v1.8.7\cmd\grpcurl` 下，
+修改 `grpcurl.go` 文件名为 `main.go`, 然后执行 `go build .`，把生成的 `grpcurl.exe` 移动到目录 `G:\GoPath\bin` 下，
+别忘了把文件名修改回来，修改 `main.go` 文件名为 `grpcurl.go`。
+
 cmux 多路复用：
 > go get -u github.com/soheilhy/cmux@v0.1.4
 
-protoc-gen-grpc-gateway 插件安装：
+protoc-gen-grpc-gateway 同端口同方法提供双流量支持插件安装：
 > go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v1.14.5
+
+在win10上，直接到目录 `G:\GoPath\pkg\mod\github.com\grpc-ecosystem\grpc-gateway@v1.16.0\protoc-gen-grpc-gateway` 下，
+然后执行 `go build .`，把生成的 `protoc-gen-grpc-gateway.exe` 移动到目录 `G:\GoPath\bin` 下。
+
+
+
+### 操作命令
+
+获取该服务的 RPC 方法列表信息：
+> grpcurl -plaintext localhost:8001 list
+
+获取自定义的 RPC Service 方法：
+> grpcurl -plaintext localhost:8001 list proto.TagService
+
+调用 RPC 方法：
+* 不指定参数
+> grpcurl -plaintext localhost:8001 proto.TagService.GetTagList
+* 指定参数
+> grpcurl -plaintext -d {\"name\":\"Go\"} localhost:8001 proto.TagService.GetTagList
+
+服务间调用：
+> go run client\client.go
+
+不同端口同时监听：
+> grpcurl -plaintext localhost:8001 proto.TagService.GetTagList
+>
+> curl localhost:8002/ping
+
+同一端口同时监听：
+> grpcurl -plaintext localhost:8003 proto.TagService.GetTagList
+> 
+> curl localhost:8003/ping
 
 重新编译 proto 文件：
 ```
@@ -52,5 +90,11 @@ protoc -I/usr/local/include -I. \
        --grpc-gateway_out=logtostderr=true:. \
        ./proto/*.proto
 ```
-protoc --grpc-gateway_out=logtostderr=true:. ./proto/*.proto
+
+在win10上，如下操作
+```
+protoc -I. -IG:\GoPath -IG:\GoPath\pkg\mod\github.com\grpc-ecosystem\grpc-gateway@v1.16.0\third_party\googleapis --grpc-gateway_out=logtostderr=true:. ./proto/*.proto
+```
+
+
 
